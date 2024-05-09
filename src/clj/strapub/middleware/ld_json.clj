@@ -54,3 +54,9 @@
     {:name "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
      :decoder [decoder {:decode-key-fn true}]
      :encoder [encoder]}))
+
+(def format-alt
+  (core/map->Format
+    {:name "application/activity+json"
+     :decoder [decoder {:decode-key-fn true}]
+     :encoder [encoder]}))
