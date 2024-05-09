@@ -62,6 +62,12 @@
      {:post {:parameters {:path {:username string?}}
              :handler (fn [{{{:keys [username]} :path} :parameters}]
                         (println (format "Posted to inbox of %s" username))
+                        {:status 200})}}]
+
+    ["/:username/outbox"
+     {:get {:parameters {:path {:username string?}}
+             :handler (fn [{{{:keys [username]} :path} :parameters}]
+                        (println (format "Posted to inbox of %s" username))
                         {:status 200})}}]]
 
    ["/.well-known"
