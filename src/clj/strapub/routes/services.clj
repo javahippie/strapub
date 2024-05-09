@@ -43,24 +43,24 @@
                          {:status 404}))}}]
     ["/:username/inbox"
      {:post {:parameters {:path {:username string?}}
-             :handler (fn [request]
-                        (activitypub/process-inbox-message request)
+             :handler (fn [{:keys [body]}]
+                        (activitypub/process-inbox-message body)
                         {:status 200})}}]
 
     ["/:username/outbox"
      {:post {:parameters {:path {:username string?}}
              :handler (fn [{{{:keys [username]} :path} :parameters}]
+                        {:status 200})}}]
+
+    ["/:username/following"
+     {:post {:parameters {:path {:username string?}}
+             :handler (fn [{{{:keys [username]} :path} :parameters}]
+                        {:status 200})}}]
+
+    ["/:username/followers"
+     {:post {:parameters {:path {:username string?}}
+             :handler (fn [{{{:keys [username]} :path} :parameters}]
                         {:status 200})}}]]
-
-   ["/:username/following"
-     {:post {:parameters {:path {:username string?}}
-             :handler (fn [{{{:keys [username]} :path} :parameters}]
-                        {:status 200})}}]
-
-   ["/:username/followers"
-     {:post {:parameters {:path {:username string?}}
-             :handler (fn [{{{:keys [username]} :path} :parameters}]
-                        {:status 200})}}]
 
 
    ["/.well-known"
