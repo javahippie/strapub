@@ -51,6 +51,6 @@
 
 (def format
   (core/map->Format
-    {:name "application/jrd+json"
+    {:name "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
      :decoder [decoder {:decode-key-fn true}]
      :encoder [encoder]}))

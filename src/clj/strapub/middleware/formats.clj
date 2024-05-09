@@ -6,5 +6,5 @@
 (def instance
   (m/create (-> m/default-options
                 (assoc :formats {"application/json" json-format/format
-                                 "application/jrd+json" json-ld-format/format})
-                (assoc  :default-format "application/jrd+json"))))
+                                 "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"" json-ld-format/format})
+                (assoc  :default-format "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""))))
