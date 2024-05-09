@@ -54,10 +54,15 @@
     ["/:username"
      {:get {:parameters {:path {:username string?}}
             :handler (fn [{{{:keys [username]} :path} :parameters}]
-                       (println username)
+                       (println (format "Queries actor %s" username))
                        (if (= username "tim")
                          {:status 200 :body (user-account-json-ld username env)}
-                         {:status 404}))}}]]
+                         {:status 404}))}}]
+    ["/:username/inbox"
+     {:post {:parameters {:path {:username string?}}
+             :handler (fn [{{{:keys [username]} :path} :parameters}]
+                        (println (format "Posted to inbox of %s" username))
+                        {:status 200})}}]]
 
    ["/.well-known"
     ["/webfinger"
