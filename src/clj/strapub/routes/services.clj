@@ -6,8 +6,6 @@
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.parameters :as parameters]
     [strapub.middleware.formats :as formats]
-    [ring.util.http-response :refer :all]
-    [clojure.java.io :as io]
     [strapub.config :refer [env]]))
 
 (defn user-json-ld [username {:keys [schema host]}]
@@ -32,7 +30,6 @@
   [""
    {:coercion spec-coercion/coercion
     :muuntaja formats/instance
-    :swagger {:id ::api}
     :middleware [ ;; query-params & form-params
                  parameters/parameters-middleware
                  ;; content-negotiation
@@ -57,15 +54,13 @@
                        (println (format "Queries actor %s" username))
                        (if (= username "tim")
                          {:status 200
-                          :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}
                           :body (user-account-json-ld username env)}
                          {:status 404}))}}]
     ["/:username/inbox"
      {:post {:parameters {:path {:username string?}}
              :handler (fn [{{{:keys [username]} :path} :parameters}]
                         (println (format "Posted to inbox of %s" username))
-                        {:status 200
-                         :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}})}}]]
+                        {:status 200})}}]]
 
    ["/.well-known"
     ["/webfinger"
@@ -74,6 +69,5 @@
                        (let [{:keys [host]} env]
                          (if (= resource (format "acct:tim@%s" host))
                            {:status 200
-                            :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}
                             :body (user-json-ld resource env)}
                            {:status 404})))}}]]])
