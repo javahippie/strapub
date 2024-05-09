@@ -43,8 +43,8 @@
                          {:status 404}))}}]
     ["/:username/inbox"
      {:post {:parameters {:path {:username string?}}
-             :handler (fn [{:keys [body]}]
-                        (activitypub/process-inbox-message body)
+             :handler (fn [request]
+                        (activitypub/process-inbox-message request)
                         {:status 200})}}]
 
     ["/:username/outbox"
