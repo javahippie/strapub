@@ -10,22 +10,22 @@
     [clojure.java.io :as io]
     [strapub.config :refer [env]]))
 
-(defn user-json-ld [username {:keys [schema host port]}]
+(defn user-json-ld [username {:keys [schema host]}]
   {:subject username
    :links [
            {:rel "self"
             :type "application/activity+json"
-            :href (format "%s://%s:%s/user/tim" schema host port)}]})
+            :href (format "%s://%s/user/tim" schema host)}]})
 
-(defn user-account-json-ld [username {:keys [schema host port publickey]}]
+(defn user-account-json-ld [username {:keys [schema host publickey]}]
   {"@context" ["https://www.w3.org/ns/activitystreams"
                "https://w3id.org/security/v1"]
-   "id" (format "%s://%s:%s/user/%s" schema host port username)
+   "id" (format "%s://%s/user/%s" schema host username)
    "type" "Person"
    "preferredUsername" "tim"
-   "inbox" (format "%s://%s:%s/user/%s/inbox" schema host port username)
-   "publicKey" {"id" (format "%s://%s:%s/user/%s#main-key" schema host port username)
-                "owner" (format "%s://%s:%s/user/%s" schema host port username)
+   "inbox" (format "%s://%s/user/%s/inbox" schema host username)
+   "publicKey" {"id" (format "%s://%s/user/%s#main-key" schema host username)
+                "owner" (format "%s://%s/user/%s" schema host username)
                 "publicKeyPem" publickey}})
 
 (defn service-routes []
