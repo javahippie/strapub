@@ -6,5 +6,5 @@
 (def instance
   (m/create (-> m/default-options
                 (assoc :formats {"application/json" json-format/format
-                                 "application/jrf+json" json-ld-format/format})
+                                 "application/jrd+json" json-ld-format/format})
                 (assoc  :default-format "application/jrd+json"))))
