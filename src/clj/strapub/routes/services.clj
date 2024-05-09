@@ -21,6 +21,7 @@
    "id" (format "%s://%s/user/%s" schema host username)
    "type" "Person"
    "preferredUsername" "tim"
+   "name" "Tim Zöller"
    "inbox" (format "%s://%s/user/%s/inbox" schema host username)
    "publicKey" {"id" (format "%s://%s/user/%s#main-key" schema host username)
                 "owner" (format "%s://%s/user/%s" schema host username)
