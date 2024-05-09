@@ -65,7 +65,7 @@
                         {:status 200})}}]
 
     ["/:username/outbox"
-     {:get {:parameters {:path {:username string?}}
+     {:post {:parameters {:path {:username string?}}
              :handler (fn [{{{:keys [username]} :path} :parameters}]
                         (println (format "Reading from outbox of %s" username))
                         {:status 200})}}]]
