@@ -56,13 +56,16 @@
             :handler (fn [{{{:keys [username]} :path} :parameters}]
                        (println (format "Queries actor %s" username))
                        (if (= username "tim")
-                         {:status 200 :body (user-account-json-ld username env)}
+                         {:status 200
+                          :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}
+                          :body (user-account-json-ld username env)}
                          {:status 404}))}}]
     ["/:username/inbox"
      {:post {:parameters {:path {:username string?}}
              :handler (fn [{{{:keys [username]} :path} :parameters}]
                         (println (format "Posted to inbox of %s" username))
-                        {:status 200})}}]]
+                        {:status 200
+                         :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}})}}]]
 
    ["/.well-known"
     ["/webfinger"
@@ -70,5 +73,7 @@
             :handler (fn [{{{:keys [resource]} :query} :parameters}]
                        (let [{:keys [host]} env]
                          (if (= resource (format "acct:tim@%s" host))
-                           {:status 200 :body (user-json-ld resource env)}
+                           {:status 200
+                            :headers {"Content-Type" "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""}
+                            :body (user-json-ld resource env)}
                            {:status 404})))}}]]])
