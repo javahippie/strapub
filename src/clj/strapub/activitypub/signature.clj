@@ -35,7 +35,7 @@
 
 
 
-(defn- hash-and-sign
+(defn hash-and-sign
   "Combines the hashing and signing from above and returns the result as a hex string"
   [text private-key-as-pem]
   (.formatHex (java.util.HexFormat/of)
@@ -43,7 +43,7 @@
                   (create-hash)
                   (sign-hash (private-key-from-string (clean-pem-key private-key-as-pem))))))
 
-(defn- verify-hash [hash expected-value public-key]
+(defn verify-hash [hash expected-value public-key]
   ;;to be done
   )
 
