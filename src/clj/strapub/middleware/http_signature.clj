@@ -20,10 +20,12 @@
   "Teeest"
   [handler]
   (fn [{:keys [headers] :as request}]
+    (if-let [request-headers (get headers "signature")]
 
-    (let [{:strs [keyId headers signature]}
-          (extract-signature-fields (get headers "signature"))]
-      (println (retrieve-public-key keyId)))
+      (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)]
+        (println (retrieve-public-key keyId)))
+
+      (println "No signature header provided"))
 
 
     ;; Header zerlegen
