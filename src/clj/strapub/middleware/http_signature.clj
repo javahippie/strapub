@@ -24,15 +24,16 @@
 (defn http-signature-middleware
   "Teeest"
   [handler]
-  (fn [{:keys [headers] :as request}]
-    (try
-      (if-let [request-headers (get headers "signature")]
-        (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
-              public-key (retrieve-public-key keyId)]
-          (signature/verify-hash signature "" public-key))
-        (println "No signature header provided"))
-      (catch Exception e
-          (.printStackTrace e)))
+  (fn [request]
+    (if-let [request-headers (get (:headers request) "signature")]
+      (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
+            public-key (retrieve-public-key keyId)
+            header-list (str/split headers #"\s")]
+        (doall (map (fn[header]
+                      (println (format "%s: %s" header (get (:headers request) header))))
+                    header-list))
+        (signature/verify-hash signature "" public-key))
+      (println "No signature header provided"))
 
 
     ;; Header zerlegen

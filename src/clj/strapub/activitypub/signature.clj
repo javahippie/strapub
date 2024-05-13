@@ -44,7 +44,7 @@
                   (sign-hash (private-key-from-string (clean-pem-key private-key-as-pem))))))
 
 (defn verify-hash [hash expected-value public-key]
-  (println (format "Called with hash: %s, expected value %s, public key %s" hash expected-value public-key))
+  (println (format "Called with hash: %s \n expected value %s \n public key %s" hash expected-value public-key))
   )
 
 (comment
