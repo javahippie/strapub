@@ -31,4 +31,4 @@
 (defn process-inbox-message
   "Receives and delegates an inbox message"
   [message]
-  (println message))
+  (println "Inbox called"))
