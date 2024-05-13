@@ -4,10 +4,13 @@
              [cheshire.core :refer [parse-string]]))
 
 (defn- extract-signature-fields [signature]
-  (into {}
-        (vec
-         (map #(str/split %1 #"=" 2)
-              (str/split signature  #"," )))))
+    (->> (str/split signature #"," )
+         (mapcat #(str/split %1 #"=" 2))
+         (map #(str/replace % #"\"" ""))
+         (partition 2)
+         (map vec)
+         (vec)
+         (into {})))
 
 (defn- retrieve-public-key [key-id]
   (-> key-id
@@ -20,12 +23,13 @@
   "Teeest"
   [handler]
   (fn [{:keys [headers] :as request}]
-    (if-let [request-headers (get headers "signature")]
-
-      (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)]
-        (println (retrieve-public-key keyId)))
-
-      (println "No signature header provided"))
+    (try
+      (if-let [request-headers (get headers "signature")]
+        (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)]
+          (println (retrieve-public-key keyId)))
+        (println "No signature header provided"))
+      (catch Exception e
+          (.printStackTrace e)))
 
 
     ;; Header zerlegen
@@ -38,5 +42,7 @@
 
 (comment
   (retrieve-public-key "https://freiburg.social/actor#main-key")
+
+
 
   )
