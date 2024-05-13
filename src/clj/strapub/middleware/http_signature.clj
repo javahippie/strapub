@@ -21,6 +21,15 @@
       parse-string
       (get-in ["publicKey" "publicKeyPem"])))
 
+(defn hash-headers [request signature-headers]
+  (let [header-list (str/split signature-headers #"\s")]
+    (signature/create-hash (str/join "\n" (map (fn[header]
+                           (if (= "(request-target)" header)
+                             (format "%s: %s" header (str (name (:request-method request)) " " (:uri request)))
+                             (format "%s: %s" header (get (:headers request) header))))
+
+                         header-list)))))
+
 (defn http-signature-middleware
   "Teeest"
   [handler]
@@ -28,11 +37,8 @@
     (if-let [request-headers (get (:headers request) "signature")]
       (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
             public-key (retrieve-public-key keyId)
-            header-list (str/split headers #"\s")]
-        (doall (map (fn[header]
-                      (println (format "%s: %s" header (get (:headers request) header))))
-                    header-list))
-        (signature/verify-hash signature "" public-key))
+            header-hash (hash-headers request headers)]
+        (signature/verify-hash signature header-hash public-key))
       (println "No signature header provided"))
 
 
@@ -45,7 +51,7 @@
     (handler request)))
 
 (comment
-
+  (:uri req)
   (retrieve-public-key "https://freiburg.social/actor#main-key")
 
 

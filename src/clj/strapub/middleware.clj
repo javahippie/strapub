@@ -8,6 +8,10 @@
     [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
   )
 
+(defn debug-middleware [handler]
+  (fn [request]
+    (handler request)))
+
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-flash
