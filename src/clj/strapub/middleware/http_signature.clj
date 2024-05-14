@@ -23,11 +23,12 @@
 
 (defn hash-headers [request signature-headers]
   (let [header-list (str/split signature-headers #"\s")]
-    (signature/create-hash (str/join "\n" (map (fn[header]
-                           (if (= "(request-target)" header)
-                             (format "%s: %s" header (str (name (:request-method request)) " " (:uri request)))
-                             (format "%s: %s" header (get (:headers request) header))))
-                         header-list)))))
+    #_(signature/create-hash)
+    (str/join "\n" (map (fn[header]
+                          (if (= "(request-target)" header)
+                            (format "%s: %s" header (str (name (:request-method request)) " " (:uri request)))
+                            (format "%s: %s" header (get (:headers request) header))))
+                        header-list))))
 
 (defn http-signature-middleware
   "Teeest"
