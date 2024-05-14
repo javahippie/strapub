@@ -4,7 +4,8 @@
              [cheshire.core :refer [parse-string]]
              [strapub.activitypub.data :as activitypub]
              [ring.util.response :as r]
-             [strapub.activitypub.signature :as signature]))
+             [strapub.activitypub.signature :as signature]
+             [strapub.config :refer [env]]))
 
 (defn- extract-signature-fields [signature]
     (->> (str/split signature #"," )
@@ -15,16 +16,38 @@
          (vec)
          (into {})))
 
+(defn extract-hostname [url]
+  (let [pattern #"^https?:\/\/([^\/?#]+)"
+        matcher (re-find pattern url)]
+    (if matcher
+      (second matcher)
+      "No match found.")))
+
+(defn create-signature-hash [request-target key-id]
+  (let [host (extract-hostname key-id)]
+    (format "(request-target): %s\nhost: %s\ndate: <Date>" request-target host)))
+
+(defn create-signature-header [request-target key-id {:keys [schema host]}]
+  (let [actor-key-id (format "%s://%s/user/%s#main-key" schema host "tim")
+        signature (signature/hash-and-sign (create-signature-hash request-target key-id) (:privatekey env))]
+    {"Signature"
+     (format "keyId=\"%s\",headers=\"(request-target) host date\",signature=\"%s\"" actor-key-id signature)}))
+
+
+
+(comment
+  (create-signature-header "/targi!" "http://localhost/user/tim#main-key" env)
+  )
+
 (defn- retrieve-public-key [key-id]
   (-> key-id
-      client/get
+      (client/get {:headers (create-signature-header "targi" key-id env)})
       :body
       parse-string
       (get-in ["publicKey" "publicKeyPem"])))
 
 (defn hash-headers [request signature-headers]
   (let [header-list (str/split signature-headers #"\s")]
-    #_(signature/create-hash)
     (str/join "\n" (map (fn[header]
                           (if (= "(request-target)" header)
                             (format "%s: %s" header (str (name (:request-method request)) " " (:uri request)))

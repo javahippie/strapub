@@ -43,13 +43,10 @@
     (.sign signature)))
 
 (defn verify-hash [signed-hash expected-value public-key]
-  (println "Signatur: " (String. signed-hash) " has type " (type signed-hash))
-  (println "Hash: " expected-value " has type " (type expected-value))
-
-  (let [signature (java.security.Signature/getInstance "SHA256withRSA")]
-    (.initVerify signature (public-key-from-string (clean-pem-key public-key)))
-    (.update signature (.getBytes expected-value java.nio.charset.StandardCharsets/UTF_8))
-    (.verify signature (.decode (java.util.Base64/getDecoder) signed-hash))))
+    (let [signature (java.security.Signature/getInstance "SHA256withRSA")]
+      (.initVerify signature (public-key-from-string (clean-pem-key public-key)))
+      (.update signature (.getBytes expected-value java.nio.charset.StandardCharsets/UTF_8))
+      (.verify signature (.decode (java.util.Base64/getDecoder) signed-hash))))
 
 
 (defn hash-and-sign
