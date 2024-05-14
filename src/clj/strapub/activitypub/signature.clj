@@ -48,7 +48,7 @@
 
   (let [signature (java.security.Signature/getInstance "SHA256withRSA")]
     (.initVerify signature (public-key-from-string (clean-pem-key public-key)))
-    (.update signature (.getBytes expected-value))
+    (.update signature (.getBytes expected-value java.nio.charset.StandardCharsets/UTF_8))
     (.verify signature (.decode (java.util.Base64/getDecoder) signed-hash))))
 
 

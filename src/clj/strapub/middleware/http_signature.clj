@@ -27,13 +27,13 @@
                            (if (= "(request-target)" header)
                              (format "%s: %s" header (str (name (:request-method request)) " " (:uri request)))
                              (format "%s: %s" header (get (:headers request) header))))
-
                          header-list)))))
 
 (defn http-signature-middleware
   "Teeest"
   [handler]
   (fn [request]
+    (println (:headers request))
     (if-let [request-headers (get (:headers request) "signature")]
       (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
             public-key (retrieve-public-key keyId)
