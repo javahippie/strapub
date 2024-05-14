@@ -14,10 +14,10 @@
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
+      http-signature-middleware
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
        (-> site-defaults
            (assoc-in [:security :anti-forgery] false)
-           (dissoc :session)))
-      http-signature-middleware))
+           (dissoc :session)))))

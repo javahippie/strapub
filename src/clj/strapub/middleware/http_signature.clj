@@ -3,6 +3,7 @@
              [clojure.string :as str]
              [cheshire.core :refer [parse-string]]
              [strapub.activitypub.data :as activitypub]
+             [ring.util.response :as r]
              [strapub.activitypub.signature :as signature]))
 
 (defn- extract-signature-fields [signature]
@@ -33,7 +34,8 @@
 (defn http-signature-middleware
   "Teeest"
   [handler]
-  (fn [request]
+  (fn
+    [request]
     (try
       (println "Middleware is looking for signature")
       (if-let [request-headers (get (:headers request) "signature")]
@@ -42,25 +44,20 @@
               header-hash (hash-headers request headers)]
           (println "Has signature header!")
           (if (signature/verify-hash signature header-hash public-key)
-            (handler request)
-            {:status 403
-             :body "Your hash sucks"}))
-        {:status 403
-         :body "You need to sign your request!"})
+            (do
+              (println "Signature matches, proceeding!")
+              (handler request))
+            (do
+              (println "No signature provided!")
+              (r/bad-request "No signature provided!"))))
+        (do
+          (println "No signature, oh noes!")
+          (r/bad-request "You need to sign your request!")))
       (catch Throwable e
         (println "Shit has hit the fan")
         (.printStackTrace e)
         {:status 500
-         :body "We suck!"}))
-
-
-    ;; Header zerlegen
-    ;; Link zu Key Extrahieren
-    ;; Actor abrufen, Public Key abziehen
-    ;; Entschlüsseln
-    ;; Hash über Header Felder bilden
-    ;; Vergleichen
-    (handler request)))
+         :body "We have screwed up!"}))))
 
 (comment
   (:uri req)
