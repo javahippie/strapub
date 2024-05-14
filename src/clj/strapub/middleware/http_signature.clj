@@ -34,15 +34,18 @@
   [handler]
   (fn [request]
     (try
+      (println "Middleware is looking for signature")
       (if-let [request-headers (get (:headers request) "signature")]
         (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
               public-key (retrieve-public-key keyId)
               header-hash (hash-headers request headers)]
+          (println "Has signature header!")
           (if (signature/verify-hash signature header-hash public-key)
             (println "The signature header was trusted")
             (println "The signature header was wrong")))
         (println "No signature header provided"))
-      (catch Exception e
+      (catch Throwable e
+        (println "Shit has hit the fan")
         (.printStackTrace e)))
 
 
