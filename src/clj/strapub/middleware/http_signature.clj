@@ -33,7 +33,6 @@
   "Teeest"
   [handler]
   (fn [request]
-    (println (:headers request))
     (if-let [request-headers (get (:headers request) "signature")]
       (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
             public-key (retrieve-public-key keyId)
