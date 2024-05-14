@@ -38,7 +38,9 @@
       (let [{:strs [keyId headers signature]} (extract-signature-fields request-headers)
             public-key (retrieve-public-key keyId)
             header-hash (hash-headers request headers)]
-        (signature/verify-hash signature header-hash public-key))
+        (if (signature/verify-hash signature header-hash public-key)
+          (println "The signature header was trusted")
+          (println "The signature header was wrong")))
       (println "No signature header provided"))
 
 
