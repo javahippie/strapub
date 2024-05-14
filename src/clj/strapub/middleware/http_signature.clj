@@ -42,12 +42,16 @@
               header-hash (hash-headers request headers)]
           (println "Has signature header!")
           (if (signature/verify-hash signature header-hash public-key)
-            (println "The signature header was trusted")
-            (println "The signature header was wrong")))
-        (println "No signature header provided"))
+            (handler request)
+            {:status 403
+             :body "Your hash sucks"}))
+        {:status 403
+         :body "You need to sign your request!"})
       (catch Throwable e
         (println "Shit has hit the fan")
-        (.printStackTrace e)))
+        (.printStackTrace e)
+        {:status 500
+         :body "We suck!"}))
 
 
     ;; Header zerlegen
