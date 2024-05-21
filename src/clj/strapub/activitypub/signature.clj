@@ -2,6 +2,15 @@
   "Provides functions to hash texts with SHA-265 and sign them with an RSA key"
   (:require [strapub.config :refer [env]]))
 
+(defn- base64-decode [input]
+  (.decode (java.util.Base64/getDecoder) input))
+
+(defn- base64-encode [input]
+  (.encode (java.util.Base64/getEncoder) input))
+
+(defn- base64-encode-to-string [input]
+  (.encodeToString (java.util.Base64/getEncoder) input))
+
 (defn- clean-pem-key
   "Clears the key, if it is passed as a PEM format with BEGIN... END... blocks and line breaks"
   [key]
@@ -12,7 +21,7 @@
 
 (defn- private-key-from-string
   "Creates an object of the class PrivateKey from the given PK String"
-  [input]
+  [^java.lang.String input]
   (let [key-factory (java.security.KeyFactory/getInstance "RSA")]
     (->> input
          (java.security.spec.PKCS8EncodedKeySpec.)
@@ -26,42 +35,42 @@
          (java.security.spec.X509EncodedKeySpec.)
          (.generatePublic key-factory))))
 
-(defn create-hash
-  "Hashes a given String with SHA-256 and retuns it as a string"
-  [value]
-  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
-    (->> (.getBytes value java.nio.charset.StandardCharsets/UTF_8)
-         (.digest digest)
-         (.formatHex (java.util.HexFormat/of)))))
-
 (defn- sign-hash
   "Signs the hash in byte array representation with a private key"
-  [value privatekey]
+  [^"[B" value
+   ^java.security.PrivateKey privatekey]
   (let [signature (java.security.Signature/getInstance "SHA256withRSA")]
     (.initSign signature privatekey)
-    (.update signature (.getBytes value java.nio.charset.StandardCharsets/UTF_8))
+    (.update signature value)
     (.sign signature)))
 
 (defn verify-hash [signed-hash expected-value public-key]
     (let [signature (java.security.Signature/getInstance "SHA256withRSA")]
       (.initVerify signature (public-key-from-string (clean-pem-key public-key)))
       (.update signature (.getBytes expected-value java.nio.charset.StandardCharsets/UTF_8))
-      (.verify signature (.decode (java.util.Base64/getDecoder) signed-hash))))
-
+      (.verify signature (base64-decode signed-hash))))
 
 (defn hash-and-sign
   "Combines the hashing and signing from above and returns the result as a hex string"
   [text private-key-as-pem]
-  (.formatHex (java.util.HexFormat/of)
-              (sign-hash text (private-key-from-string (clean-pem-key private-key-as-pem)))))
+
+  (->> private-key-as-pem
+       (clean-pem-key)
+       (private-key-from-string)
+       (sign-hash (.getBytes text java.nio.charset.StandardCharsets/UTF_8))
+       (base64-encode-to-string)))
 
 (comment
+
+  (let [hash-base "(request-target): get /user/tim\nhost: localhost\ndate: 18 Dec 2019 10:08:46 GMT"
+        signed-hash (hash-and-sign hash-base (:privatekey env))]
+    (verify-hash signed-hash hash-base (:publickey env)))
+
+
   (hash-and-sign "(request-target): get /user/tim\nhost: localhost\ndate: 18 Dec 2019 10:08:46 GMT"
                  (:privatekey env))
 
-  (verify-hash (.encode (java.util.Base64/getEncoder) (.getBytes "9641b09360e81b8f0c423dde63387023541bf249fd8ab018e5386ac029fd364d30183365fe065159dcdf2adc2045fcba73cc616ee5701fd09392d3290f2e4e0ef6073424decbc14ae9bb60975a0a707cacae406195addc0322d46a9d9a763b86533c6ce4e7691333b6c001ff481c5703aad9d3c4f316a9573d0e98ddd61f8f5e4a4b5955c5ff5635c2172ced7f218fec3b477bcd20caeb5bb5c1072a32245363b8ab44e152805af0524e2a49171dbaefcc7bc6dce7893112935f3e045098a5e89f9256ea13843dab52e41024d53d1bf4f3dd41dff4ad28bfefd350505241fa9b0de53361486e379c0343b77c2027426431a10708befce32b804682e65803f69b"))
-               "(request-target): get /user/tim\nhost: localhost\ndate: 18 Dec 2019 10:08:46 GMT"
-               (:publickey env))
+
 
   ;; mastodon.social
   (let [my-hash "(request-target): post /user/tim/inbox\nhost: strapub.javahippie.net\ndate: Tue, 14 May 2024 18:32:50 GMT\ndigest: SHA-256=woX1MKwLTnkaVjaxjJHntCOIPwsvZOyzP1AfJ6sEG9c=\ncontent-type: application/activity+json"]
